@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Validator</title>
+</head>
+<body>
+    <h1>Ticket Validator</h1>
+    <div id="ticketForm">
+        <h2>Generate New Ticket</h2>
+        <form id="generateForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required><br><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br><br>
+            <button type="submit">Generate Ticket</button>
+        </form>
+    </div>
+    <div id="qrCodeContainer" style="display: none;">
+        <h2>Your Ticket QR Code</h2>
+        <div id="qrCode"></div>
+        <p>Please save this QR code or send it by email.</p>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const generateForm = document.getElementById('generateForm');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrCode = document.getElementById('qrCode');
+
+            generateForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(generateForm);
+                const name = formData.get('name');
+                const email = formData.get('email');
+                const password = formData.get('password');
+
+                fetch('http://localhost:8000/generate_ticket/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        qrCodeImg.src = data.qr_code_path; // Set the src attribute of the img tag to the QR code path
+                        qrCodeContainer.style.display = 'block';
+                        generateForm.reset();
+                    })
+                    .catch(error => {
+                    console.error('Error:', error);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

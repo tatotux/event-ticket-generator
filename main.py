@@ -1,13 +1,22 @@
 # main.py
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from databases import Database
 import qrcode
 import io
 import base64
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
 DATABASE_URL = "sqlite:///./tickets.db"
 database = Database(DATABASE_URL)
@@ -17,6 +26,11 @@ class Ticket(BaseModel):
     name: str
     email: str
     used: bool = False
+
+class TicketRequest(BaseModel):
+    name: str
+    email: str
+    password: str
 
 async def create_tables():
     query = """
@@ -44,14 +58,10 @@ async def generate_ticket(name: str, email: str):
     img_str = base64.b64encode(buf.read()).decode('utf-8')
     return {"ticket_id": ticket_id, "qr_code": img_str}
 
-async def validate_ticket(ticket_id: int):
-    ticket = await database.fetch_one("SELECT * FROM tickets WHERE id = :id", values={"id": ticket_id})
-    if ticket:
-        if ticket['used']:
-            raise HTTPException(status_code=400, detail="Ticket already used")
-        await database.execute("UPDATE tickets SET used = :used WHERE id = :id", values={"used": True, "id": ticket_id})
-        return {"message": "Ticket is valid"}
-    raise HTTPException(status_code=404, detail="Ticket not found")
+async def get_tickets():
+    query = "SELECT * FROM tickets"
+    tickets = await database.fetch_all(query)
+    return tickets
 
 @app.on_event("startup")
 async def startup():
@@ -63,9 +73,13 @@ async def shutdown():
     await database.disconnect()
 
 @app.post("/generate_ticket/")
-async def generate_ticket_endpoint(name: str, email: str):
-    return await generate_ticket(name, email)
+async def generate_ticket_endpoint(ticket_request: TicketRequest):
+    if ticket_request.password != "your_password":
+        raise HTTPException(status_code=401, detail="Invalid password")
 
-@app.get("/validate_ticket/{ticket_id}")
-async def validate_ticket_endpoint(ticket_id: int):
-    return await validate_ticket(ticket_id)
+    return await generate_ticket(ticket_request.name, ticket_request.email)
+
+@app.get("/tickets/")
+async def get_tickets_endpoint():
+    tickets = await get_tickets()
+    return tickets
