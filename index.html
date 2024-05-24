@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Validator</title>
+</head>
+<body>
+    <h1>Ticket Validator</h1>
+    <button id="scanBtn">Scan QR Code</button>
+    <div id="result"></div>
+
+    <script src="html5-qrcode.min.js"></script>
+    <script>
+        function startQRCodeScanner() {
+            const html5QrCode = new Html5Qrcode("result");
+            const config = { fps: 10, qrbox: 250 };
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                config, 
+                qrCodeMessage => {
+                    fetch(`http://localhost:8000/validate_ticket/${qrCodeMessage}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message === "Ticket is valid") {
+                                alert("Ticket is valid");
+                            } else {
+                                alert("Ticket is invalid");
+                            }
+                        })
+                        .catch(err => alert("Error: " + err));
+                },
+                errorMessage => {
+                    console.log(`QR Code no longer in front of camera.`);
+                }
+            ).catch(err => {
+                console.log(`Unable to start scanning, error: ${err}`);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(startQRCodeScanner, 1000); // Delay execution by 1 second
+        });
+    </script>
+</body>
+</html>
