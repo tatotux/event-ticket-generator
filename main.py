@@ -1,11 +1,11 @@
-# main.py
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from databases import Database
 import qrcode
-import io
-import base64
-from fastapi.responses import StreamingResponse
+import hashlib
+import os
+import secrets
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -21,12 +21,6 @@ app.add_middleware(
 DATABASE_URL = "sqlite:///./tickets.db"
 database = Database(DATABASE_URL)
 
-class Ticket(BaseModel):
-    id: int
-    name: str
-    email: str
-    used: bool = False
-
 class TicketRequest(BaseModel):
     name: str
     email: str
@@ -38,30 +32,32 @@ async def create_tables():
         id INTEGER PRIMARY KEY,
         name TEXT,
         email TEXT,
-        used BOOLEAN
+        used BOOLEAN,
+        hash TEXT,
+        qr_code_path TEXT
     );
     """
     await database.execute(query)
 
 async def generate_ticket(name: str, email: str):
-    ticket_id = await database.execute("INSERT INTO tickets (name, email, used) VALUES (:name, :email, :used)", 
-                                       values={"name": name, "email": email, "used": False})
-    # Generate QR code
+    existing_ticket = await database.fetch_one("SELECT * FROM tickets WHERE email = :email", values={"email": email})
+    if existing_ticket:
+        raise HTTPException(status_code=400, detail="Email already used for a ticket")
+
+    ticket_hash = hashlib.sha256(secrets.token_bytes(32)).hexdigest()
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
-    qr.add_data(f"{ticket_id}")
+    qr.add_data(ticket_hash)
     qr.make(fit=True)
     img = qr.make_image(fill='black', back_color='white')
-    buf = io.BytesIO()
-    img.save(buf)
-    buf.seek(0)
 
-    img_str = base64.b64encode(buf.read()).decode('utf-8')
-    return {"ticket_id": ticket_id, "qr_code": img_str}
+    os.makedirs("qr_codes", exist_ok=True)
+    image_path = f"qr_codes/{ticket_hash}.png"
+    img.save(image_path)
 
-async def get_tickets():
-    query = "SELECT * FROM tickets"
-    tickets = await database.fetch_all(query)
-    return tickets
+    ticket_id = await database.execute("INSERT INTO tickets (name, email, used, hash, qr_code_path) VALUES (:name, :email, :used, :hash, :qr_code_path)", 
+                                       values={"name": name, "email": email, "used": False, "hash": ticket_hash, "qr_code_path": image_path})
+
+    return {"ticket_id": ticket_id, "qr_code_path": image_path}
 
 @app.on_event("startup")
 async def startup():
@@ -74,12 +70,35 @@ async def shutdown():
 
 @app.post("/generate_ticket/")
 async def generate_ticket_endpoint(ticket_request: TicketRequest):
-    if ticket_request.password != "your_password":
+    if ticket_request.password != "your_password":  # Replace with your actual password
         raise HTTPException(status_code=401, detail="Invalid password")
 
     return await generate_ticket(ticket_request.name, ticket_request.email)
 
 @app.get("/tickets/")
-async def get_tickets_endpoint():
-    tickets = await get_tickets()
+async def get_tickets_endpoint(password: str = Query(...)):
+    if password != "your_password":  # Replace with your actual password
+        raise HTTPException(status_code=401, detail="Invalid password")
+    
+    tickets = await database.fetch_all("SELECT * FROM tickets")
     return tickets
+
+@app.delete("/cleanup/")
+async def cleanup_database(password: str = Query(...)):
+    if password != "your_cleanup_password":  # Replace with your actual cleanup password
+        raise HTTPException(status_code=401, detail="Invalid password")
+    
+    await database.execute("DELETE FROM tickets")
+    return {"detail": "All tickets have been deleted"}
+
+@app.get("/validate_ticket/{ticket_hash}")
+async def validate_ticket(ticket_hash: str):
+    ticket = await database.fetch_one("SELECT * FROM tickets WHERE hash = :hash", values={"hash": ticket_hash})
+    if ticket is None:
+        return {"message": "Ticket is invalid"}
+    if ticket["used"]:
+        return {"message": "Ticket has already been used"}
+    await database.execute("UPDATE tickets SET used = :used WHERE hash = :hash", values={"used": True, "hash": ticket_hash})
+    return {"message": "Ticket is valid"}
+
+app.mount("/qr_codes", StaticFiles(directory="qr_codes"), name="qr_codes")

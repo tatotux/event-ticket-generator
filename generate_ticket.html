@@ -21,16 +21,15 @@
     </div>
     <div id="qrCodeContainer" style="display: none;">
         <h2>Your Ticket QR Code</h2>
-        <div id="qrCode"></div>
+        <img id="qrCodeImg" src="" alt="QR Code">
         <p>Please save this QR code or send it by email.</p>
     </div>
 
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const generateForm = document.getElementById('generateForm');
             const qrCodeContainer = document.getElementById('qrCodeContainer');
-            const qrCode = document.getElementById('qrCode');
+            const qrCodeImg = document.getElementById('qrCodeImg');
 
             generateForm.addEventListener('submit', function(event) {
                 event.preventDefault();
@@ -49,16 +48,22 @@
                         email: email,
                         password: password
                     })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        qrCodeImg.src = data.qr_code_path; // Set the src attribute of the img tag to the QR code path
-                        qrCodeContainer.style.display = 'block';
-                        generateForm.reset();
-                    })
-                    .catch(error => {
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => { throw new Error(data.detail); });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    qrCodeImg.src = `http://localhost:8000/${data.qr_code_path}`;
+                    qrCodeContainer.style.display = 'block';
+                    generateForm.reset();
+                })
+                .catch(error => {
                     console.error('Error:', error);
-                    });
+                    alert('Error: ' + error.message);
+                });
             });
         });
     </script>

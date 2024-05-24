@@ -26,7 +26,7 @@
                             if (data.message === "Ticket is valid") {
                                 alert("Ticket is valid");
                             } else {
-                                alert("Ticket is invalid");
+                                alert("Ticket is invalid or already used");
                             }
                         })
                         .catch(err => alert("Error: " + err));
@@ -40,7 +40,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", function() {
-            setTimeout(startQRCodeScanner, 1000); // Delay execution by 1 second
+            document.getElementById("scanBtn").addEventListener("click", startQRCodeScanner);
         });
     </script>
 </body>
