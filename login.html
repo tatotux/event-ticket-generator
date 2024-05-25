@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4 text-center"><i class="fas fa-sign-in-alt"></i> Login</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Username:</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
+        </form>
+        <div id="loginResult" class="mt-4"></div>
+        <nav class="mt-4">
+            <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Home</a>
+            <a href="generate_ticket.html" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Generate Ticket</a>
+        </nav>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const username = formData.get("username");
+            const password = formData.get("password");
+
+            fetch("http://localhost:8000/token/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: new URLSearchParams({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.access_token) {
+                    document.getElementById("loginResult").innerText = "Login successful!";
+                    window.location.href = "index.html";
+                } else {
+                    document.getElementById("loginResult").innerText = "Login failed!";
+                }
+            })
+            .catch(error => {
+                document.getElementById("loginResult").innerText = "An error occurred: " + error;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,26 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Validator</title>
+    <title>Generate Ticket</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Ticket Validator</h1>
-    <div id="ticketForm">
-        <h2>Generate New Ticket</h2>
+    <div class="container">
+        <h1 class="my-4 text-center"><i class="fas fa-ticket-alt"></i> Generate New Ticket</h1>
         <form id="generateForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required><br><br>
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br><br>
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br><br>
-            <button type="submit">Generate Ticket</button>
+            <div class="form-group">
+                <label for="name"><i class="fas fa-user"></i> Name:</label>
+                <input type="text" id="name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fas fa-ticket-alt"></i> Generate Ticket</button>
         </form>
-    </div>
-    <div id="qrCodeContainer" style="display: none;">
-        <h2>Your Ticket QR Code</h2>
-        <img id="qrCodeImg" src="" alt="QR Code">
-        <p>Please save this QR code or send it by email.</p>
+        <div id="qrCodeContainer" class="mt-4" style="display: none;">
+            <h2>Your Ticket QR Code</h2>
+            <img id="qrCodeImg" src="" alt="QR Code" class="img-fluid">
+            <p>Please save this QR code or send it by email.</p>
+        </div>
+        <nav class="mt-4">
+            <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Home</a>
+            <a href="login.html" class="btn btn-secondary"><i class="fas fa-sign-in-alt"></i> Login</a>
+        </nav>
     </div>
 
     <script>
