@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = "mysql://ticket_user:XvJ7!252gi*N@7@localhost/ticketing_system"
+DATABASE_URL = "mysql://ticket_user:XvJ7!252gi*N@7@192.168.100.102/ticketing_system"
 database = Database(DATABASE_URL)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -59,7 +59,7 @@ async def create_tables():
 async def generate_ticket(name: str, email: str):
     existing_ticket = await database.fetch_one("SELECT * FROM tickets WHERE email = :email", values={"email": email})
     if existing_ticket:
-        raise HTTPException(status_code=400, detail="Email already used for a ticket")
+        raise HTTPException(status_code=400, detail="Correo electrónico ya registrado")
 
     ticket_hash = hashlib.sha256(secrets.token_bytes(32)).hexdigest()
     qr = qrcode.QRCode(version=1, box_size=10, border=5)
@@ -92,7 +92,7 @@ async def generate_ticket_endpoint(ticket_request: TicketRequest):
 @app.get("/tickets/")
 async def get_tickets_endpoint(password: str = Query(...)):
     if password != "your_password":  # Replace with your actual password
-        raise HTTPException(status_code=401, detail="Invalid password")
+        raise HTTPException(status_code=401, detail="Clave no valida")
     
     tickets = await database.fetch_all("SELECT * FROM tickets")
     return tickets
@@ -100,26 +100,26 @@ async def get_tickets_endpoint(password: str = Query(...)):
 @app.delete("/cleanup/")
 async def cleanup_database(password: str = Query(...)):
     if password != "your_cleanup_password":  # Replace with your actual cleanup password
-        raise HTTPException(status_code=401, detail="Invalid password")
+        raise HTTPException(status_code=401, detail="Clave no valida")
     
     await database.execute("DELETE FROM tickets")
-    return {"detail": "All tickets have been deleted"}
+    return {"detail": "Todos los tickets han sido eliminados"}
 
 @app.get("/validate_ticket/{ticket_hash}")
 async def validate_ticket(ticket_hash: str):
     ticket = await database.fetch_one("SELECT * FROM tickets WHERE hash = :hash", values={"hash": ticket_hash})
     if ticket is None:
-        return {"message": "Ticket is invalid"}
+        return {"message": "Ticket no encontrado"}
     if ticket["used"]:
-        return {"message": "Ticket has already been used"}
+        return {"message": "Tickets ya ha sido utilizado"}
     await database.execute("UPDATE tickets SET used = :used WHERE hash = :hash", values={"used": True, "hash": ticket_hash})
-    return {"message": "Ticket is valid"}
+    return {"message": "Tickets es no valido"}
 
 @app.post("/create_user/")
 async def create_user(user: User):
     hashed_password = pwd_context.hash(user.password)
     await database.execute("INSERT INTO users (username, password) VALUES (:username, :password)", values={"username": user.username, "password": hashed_password})
-    return {"message": "User created successfully"}
+    return {"message": "Usuario creado exitosamente"}
 
 @app.post("/token/")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):

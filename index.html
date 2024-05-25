@@ -28,7 +28,7 @@
                 { facingMode: "environment" }, 
                 config, 
                 qrCodeMessage => {
-                    fetch(`http://192.168.68.57:8000/validate_ticket/${qrCodeMessage}`)
+                    fetch(`http://localhost:8000/validate_ticket/${qrCodeMessage}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.message === "Ticket is valid") {

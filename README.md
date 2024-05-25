@@ -51,7 +51,7 @@ This repository contains a complete solution for an event ticketing system. The 
 1. **Generate a Ticket**:
     - Send a POST request to `/generate_ticket/` with the buyer's name and email:
       ```bash
-      curl -X POST "http://192.168.68.57:8000/generate_ticket/?name=John Doe&email=johndoe@example.com"
+      curl -X POST "http://localhost:8000/generate_ticket/?name=John Doe&email=johndoe@example.com"
       ```
     - The response will include the ticket ID and a base64-encoded QR code image.
 

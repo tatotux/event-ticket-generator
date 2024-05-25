@@ -49,7 +49,7 @@
                 const email = formData.get('email');
                 const password = formData.get('password');
 
-                fetch('http://192.168.68.57:8000/generate_ticket/', {
+                fetch('http://localhost:8000/generate_ticket/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -67,7 +67,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    qrCodeImg.src = `http://192.168.68.57:8000/${data.qr_code_path}`;
+                    qrCodeImg.src = `http://localhost:8000/${data.qr_code_path}`;
                     qrCodeContainer.style.display = 'block';
                     generateForm.reset();
                 })
