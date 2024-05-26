@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Tiquetes</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -54,7 +54,7 @@
                 const username = formData.get('username');
                 const password = formData.get('password');
 
-                fetch('http://localhost:8000/generate_ticket/', {
+                fetch(`https://${HOST}:8000/generate_ticket/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -73,7 +73,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    qrCodeImg.src = `http://localhost:8000/${data.qr_code_path}`;
+                    qrCodeImg.src = `https://${HOST}:8000/${data.qr_code_path}`;
                     qrCodeContainer.style.display = 'block';
                     generateForm.reset();
                 })

@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DATABASE_URL = "mysql://ticket_user:XvJ7!252gi*N@7@192.168.100.102/ticketing_system"
+DATABASE_URL = f"mysql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['HOST']}/{os.environ['DB_NAME']}"
 database = Database(DATABASE_URL)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
