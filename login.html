@@ -12,19 +12,19 @@
         <h1 class="my-4 text-center"><i class="fas fa-sign-in-alt"></i> Login</h1>
         <form id="loginForm">
             <div class="form-group">
-                <label for="username"><i class="fas fa-user"></i> Username:</label>
+                <label for="username"><i class="fas fa-user"></i> Usuario:</label>
                 <input type="text" id="username" name="username" class="form-control" required>
             </div>
             <div class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> Password:</label>
+                <label for="password"><i class="fas fa-lock"></i> Clave:</label>
                 <input type="password" id="password" name="password" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary btn-lg btn-block"><i class="fas fa-sign-in-alt"></i> Login</button>
         </form>
         <div id="loginResult" class="mt-4"></div>
         <nav class="mt-4">
-            <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Home</a>
-            <a href="generate_ticket.html" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Generate Ticket</a>
+            <a href="index.html" class="btn btn-secondary"><i class="fas fa-home"></i> Inicio</a>
+            <a href="generate_ticket.html" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Generar tiquete</a>
         </nav>
     </div>
 
@@ -48,14 +48,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.access_token) {
-                    document.getElementById("loginResult").innerText = "Login successful!";
+                    document.getElementById("loginResult").innerText = "Ingreso exitoso!";
                     window.location.href = "index.html";
                 } else {
-                    document.getElementById("loginResult").innerText = "Login failed!";
+                    document.getElementById("loginResult").innerText = "Falló el login. Intente de nuevo.";
                 }
             })
             .catch(error => {
-                document.getElementById("loginResult").innerText = "An error occurred: " + error;
+                document.getElementById("loginResult").innerText = "Un error ocurrió: " + error;
             });
         });
     </script>

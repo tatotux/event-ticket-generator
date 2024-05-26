@@ -29,6 +29,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 class TicketRequest(BaseModel):
     name: str
     email: str
+    username: str
     password: str
 
 class User(BaseModel):
@@ -87,6 +88,9 @@ async def shutdown():
 
 @app.post("/generate_ticket/")
 async def generate_ticket_endpoint(ticket_request: TicketRequest):
+    user = await database.fetch_one("SELECT * FROM users WHERE username = :username", values={"username": ticket_request.username})
+    if not user or not pwd_context.verify(ticket_request.password, user["password"]):
+        raise HTTPException(status_code=401, detail="Credenciales Inválidas")
     return await generate_ticket(ticket_request.name, ticket_request.email)
 
 @app.get("/tickets/")
@@ -113,7 +117,7 @@ async def validate_ticket(ticket_hash: str):
     if ticket["used"]:
         return {"message": "Tickets ya ha sido utilizado"}
     await database.execute("UPDATE tickets SET used = :used WHERE hash = :hash", values={"used": True, "hash": ticket_hash})
-    return {"message": "Tickets es no valido"}
+    return {"message": "Tickets es valido"}
 
 @app.post("/create_user/")
 async def create_user(user: User):
@@ -125,7 +129,7 @@ async def create_user(user: User):
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = await database.fetch_one("SELECT * FROM users WHERE username = :username", values={"username": form_data.username})
     if not user or not pwd_context.verify(form_data.password, user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Credenciales Inválidas")
     return {"access_token": form_data.username, "token_type": "bearer"}
 
 app.mount("/qr_codes", StaticFiles(directory="qr_codes"), name="qr_codes")

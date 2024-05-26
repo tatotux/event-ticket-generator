@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ticket Validator</title>
+    <title>Tiquetes de Fiesta</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1 class="my-4 text-center"><i class="fas fa-ticket-alt"></i> Ticket Validator</h1>
-        <button id="scanBtn" class="btn btn-primary btn-lg btn-block"><i class="fas fa-qrcode"></i> Scan QR Code</button>
+        <h1 class="my-4 text-center"><i class="fas fa-ticket-alt"></i> Validar tiquetes</h1>
+        <button id="scanBtn" class="btn btn-primary btn-lg btn-block"><i class="fas fa-qrcode"></i> Escanear el código QR</button>
         <div id="result" class="mt-4"></div>
         <nav class="mt-4">
-            <a href="generate_ticket.html" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Generate Ticket</a>
-            <a href="login.html" class="btn btn-secondary"><i class="fas fa-sign-in-alt"></i> Login</a>
+            <a href="generate_ticket.html" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Generador de tiquetes</a>
+            <a href="login.html" class="btn btn-secondary"><i class="fas fa-sign-in-alt"></i> Ingreso</a>
         </nav>
     </div>
 
@@ -31,19 +31,15 @@
                     fetch(`http://localhost:8000/validate_ticket/${qrCodeMessage}`)
                         .then(response => response.json())
                         .then(data => {
-                            if (data.message === "Ticket is valid") {
-                                alert("Ticket is valid");
-                            } else {
-                                alert("Ticket is invalid or already used");
-                            }
+                            alert(data.message);
                         })
                         .catch(err => alert("Error: " + err));
                 },
                 errorMessage => {
-                    console.log(`QR Code no longer in front of camera.`);
+                    console.log(`No hay un QR al frente de la cámara.`);
                 }
             ).catch(err => {
-                console.log(`Unable to start scanning, error: ${err}`);
+                console.log(`Error al iniciar de escanear, error: ${err}`);
             });
         }
 
