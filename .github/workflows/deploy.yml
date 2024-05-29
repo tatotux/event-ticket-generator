@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout code
@@ -23,40 +23,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Debug environment
-      run: |
-        echo "Debug: Checking if commands are available"
-        which mkdir
-        which echo
-        which chmod
-        which ssh-keyscan
-        which scp
-        which ssh
-      shell: bash
-
-    - name: Prepare SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
-      shell: bash
-      env:
-        SERVER_IP: ${{ secrets.HOST }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-
     - name: Deploy to server
       run: |
-        scp -r . user@$SERVER_IP:$APP_PATH
-        ssh user@$SERVER_IP << 'EOF'
-          cd $APP_PATH
-          source venv/bin/activate
-          pip install -r requirements.txt
-          sudo systemctl restart $YOUR_APP
-        EOF
-      shell: bash
+        cd ${{ secrets.PATH }}
+        source venv/bin/activate
+        pip install -r requirements.txt
+        sudo systemctl restart ${{ secrets.APP }}
       env:
-        SERVER_IP: ${{ secrets.HOST }}
-        APP_PATH: ${{ secrets.PATH }}
-        YOUR_APP: ${{ secrets.APP }}
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        PATH: ${{ secrets.PATH }}
+        APP: ${{ secrets.APP }}
