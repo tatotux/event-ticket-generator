@@ -25,12 +25,13 @@ jobs:
 
     - name: Prepare SSH
       run: |
-        mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+      shell: bash
       env:
         SERVER_IP: ${{ secrets.HOST }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Deploy to server
       run: |
@@ -41,6 +42,7 @@ jobs:
           pip install -r requirements.txt
           sudo systemctl restart $YOUR_APP
         EOF
+      shell: bash
       env:
         SERVER_IP: ${{ secrets.HOST }}
         APP_PATH: ${{ secrets.PATH }}
