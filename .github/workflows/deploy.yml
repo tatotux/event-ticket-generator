@@ -21,10 +21,7 @@ jobs:
 
     - name: Deploy to server
       run: |
-        cd ${{ secrets.PATH }}
         source /home/azureuser/venv/bin/activate
-        pip install -r requirements.txt
         sudo systemctl restart ${{ secrets.APP }}
       env:
-        PATH: ${{ secrets.PATH }}
         APP: ${{ secrets.APP }}
