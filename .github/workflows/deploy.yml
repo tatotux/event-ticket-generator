@@ -23,6 +23,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Debug environment
+      run: |
+        echo "Debug: Checking if commands are available"
+        which mkdir
+        which echo
+        which chmod
+        which ssh-keyscan
+        which scp
+        which ssh
+      shell: bash
+
     - name: Prepare SSH
       run: |
         mkdir -p ~/.ssh
