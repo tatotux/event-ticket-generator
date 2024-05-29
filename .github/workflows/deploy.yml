@@ -28,16 +28,21 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H your_server_ip >> ~/.ssh/known_hosts
+        ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+      env:
+        SERVER_IP: ${{ secrets.HOST }}
 
     - name: Deploy to server
       run: |
-        scp -r . user@your_server_ip:/path/to/your/app
-        ssh user@your_server_ip << 'EOF'
-          cd /path/to/your/app
+        scp -r . user@$SERVER_IP:$APP_PATH
+        ssh user@$SERVER_IP << 'EOF'
+          cd $APP_PATH
           source venv/bin/activate
           pip install -r requirements.txt
-          sudo systemctl restart yourapp
+          sudo systemctl restart $YOUR_APP
         EOF
       env:
+        SERVER_IP: ${{ secrets.HOST }}
+        APP_PATH: ${{ secrets.PATH }}
+        YOUR_APP: ${{ secrets.APP }}
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
